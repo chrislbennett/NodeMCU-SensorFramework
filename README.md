@@ -14,6 +14,7 @@ The sensors are read at a regular interval, sent as a JSON object to an MQTT ser
 
 ## Theory of Operation
 The framework performs the following simple process to provide to feed the sensor data to the server.
+
 1. Upon startup, wait for the WIFI module to connect to the network.  It does this by checking every 10 seconds for connectivity.
 2. Attempt to connect to MQTT, if it fails wait 10 seconds and try again.
 3. Begin checking the sensors and sending data to the MQTT server.
@@ -33,3 +34,18 @@ In case your looking for dev tools to use for modifying the LUA code, there are 
 4. Upload the ReaderProcess.lua file
 5. Modify and upload the the ReaderSettings.lua file to suit your needs.  Be sure to specify the device name, MQTT server and the sensors you plan to connect.
 6. Once you're ready, upload the init.lua which will immediately launch the process.
+
+## Pinouts
+
+Comming Soon ...
+
+## MQTT Format
+
+The format of the data provided to MQTT is identical; however, only the specific fields will be populated based upon the sensors choosen in the ReaderSettings.lua file above.
+
+Example
+{"humi2":0,"temp2":0,"temp1":-12,"depth1":0,"DeviceName":"DownstairsFridge"}
+
+* depth1 - Cooresponds to a depth sensor, if used.
+* temp1 - corresponds to the DS12b20 sensor, if used.
+* temp2 & humi2 - correspond to the DHT22 sensor, if used.
