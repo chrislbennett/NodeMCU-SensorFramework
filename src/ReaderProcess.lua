@@ -60,7 +60,7 @@ m:on("message", function(conn, topic, data)
 end)
 
 --fire the timer to send the data points if mqtt is available
-tmr.alarm(0,2000,1,function()
+tmr.alarm(0,Settings.ReadDelay,1,function()
 
     if mqttconnected == 1 then
         print("Sending New Readings")
@@ -102,6 +102,7 @@ tmr.alarm(0,2000,1,function()
         msg.temp2=temp
         msg.humi2=humi
         msg.DeviceName=Settings.DeviceName
+        msg.Version=Settings.Version
 
         m:publish(Settings.MQTTTopic,cjson.encode(msg),0,0)
 
