@@ -18,7 +18,7 @@ temp2Readings = {};
 humi2Readings = {};
 readingsCount=0;
 
-for i=0,Settings.AverageNumReadings do
+for i=0,Settings.AverageNumReadings-1 do
     temp1Readings[i] = 0;
     distReadings[i] = 0;
     temp2Readings[i] = 0;
@@ -31,15 +31,15 @@ mqttconnected = 0
 --used to average together set of values and return an averaged value
 function average_readings(obj, newValue)   
     --move the values around to make it work
-    for i=Settings.AverageNumReadings,1,-1 do
+    for i=1,Settings.AverageNumReadings-1,1 do       
         obj[i-1] = obj[i];
     end
     --insert the new reading
-    obj[Settings.AverageNumReadings] = newValue;
+    obj[Settings.AverageNumReadings-1] = newValue;
 
     --average the values
     avg = 0
-    for i=0,Settings.AverageNumReadings,1 do
+    for i=0,Settings.AverageNumReadings-1,1 do
         avg = avg + obj[i];
     end
 
