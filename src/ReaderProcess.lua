@@ -16,8 +16,9 @@ temp1Readings = {};
 distReadings = {};
 temp2Readings = {};
 humi2Readings = {};
+readingsCount=0;
 
-for i,0,Settings.AverageNumReadings do
+for i=0,Settings.AverageNumReadings do
     temp1Readings[i] = 0;
     distReadings[i] = 0;
     temp2Readings[i] = 0;
@@ -30,7 +31,7 @@ mqttconnected = 0
 --used to average together set of values and return an averaged value
 function average_readings(obj, newValue)   
     --move the values around to make it work
-    for i,Settings.AverageNumReadings,1,-1 do
+    for i=Settings.AverageNumReadings,1,-1 do
         obj[i-1] = obj[i];
     end
     --insert the new reading
@@ -38,7 +39,7 @@ function average_readings(obj, newValue)
 
     --average the values
     avg = 0
-    for i,0,Settings.AverageNumReadings,1 do
+    for i=0,Settings.AverageNumReadings,1 do
         avg = avg + obj[i];
     end
 
@@ -94,7 +95,8 @@ end)
 tmr.alarm(0,Settings.ReadDelay,1,function()
 
     if mqttconnected == 1 then
-        print("Sending New Readings")
+        print("-----------------------")
+        print("Reading Sensors")
         ctemp=0
         dist=0
         temp=0
@@ -104,7 +106,9 @@ tmr.alarm(0,Settings.ReadDelay,1,function()
         if Settings.EnableDS18B20==1 then        
             ctemp = t.read()
             if ctemp ~= nil then
-                print("Temp1:"..ctemp)
+               ctemp=average_readings(temp1Readings,ctemp);
+               
+               print("Temp1:"..ctemp)
             end
         end
 
@@ -113,6 +117,7 @@ tmr.alarm(0,Settings.ReadDelay,1,function()
             dist = device.measure_avg()*100
 
             if dist ~= nil then
+                dist=average_readings(distReadings,dist);
                 print("Dist:"..dist)    
             end
         end
@@ -122,23 +127,31 @@ tmr.alarm(0,Settings.ReadDelay,1,function()
             --read the temp/humidity sensor
             status,temp,humi,temp_decimial,humi_decimial = dht.read(2)
             if status == dht.OK then
+                temp=average_readings(temp2Readings,temp);
+                humi=average_readings(humi2Readings,humi);
+
                 print("Temp2:"..temp)
                 print("Humi2:"..humi)
             end
         end
+       
+        --figure out if we have enough sensor data to work with
+        if readingsCount<=Settings.MinimumNumReadings then
+            readingsCount = readingsCount+1;
+            print("Waiting for More Readings")
+        else
+            print("Sending Readings")
+            msg={}
+            msg.temp1=ctemp
+            msg.depth1=dist
+            msg.temp2=temp
+            msg.humi2=humi
+            msg.DeviceName=Settings.DeviceName
+            msg.Version=Settings.Version
 
-        --average the readings
-        temp=average_readings(temp2Readings,temp);
+            m:publish(Settings.MQTTTopic,cjson.encode(msg),0,0)
+        end
 
-        msg={}
-        msg.temp1=ctemp
-        msg.depth1=dist
-        msg.temp2=temp
-        msg.humi2=humi
-        msg.DeviceName=Settings.DeviceName
-        msg.Version=Settings.Version
-
-        m:publish(Settings.MQTTTopic,cjson.encode(msg),0,0)
 
         --free up memory
         ctemp = nil

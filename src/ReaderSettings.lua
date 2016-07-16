@@ -2,11 +2,12 @@ Settings = {};
 Settings.Version = '2.0a';
 
 --Device Settings
-Settings.DeviceName = '2ndFloorTemperature';
+Settings.DeviceName = '2nd Floor';
 --Delay between readings (ms)
 Settings.ReadDelay = 2000;
 --Number of Readings to Average
 Settings.AverageNumReadings=4;
+Settings.MinimumNumReadings=6;
 
 --MQTT Server Info
 Settings.MQTTServer = '192.168.1.95';
