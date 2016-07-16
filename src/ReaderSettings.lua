@@ -2,9 +2,9 @@ Settings = {};
 Settings.Version = '2.0a';
 
 --Device Settings
-Settings.DeviceName = 'Reader Name';
+Settings.DeviceName = '2ndFloorTemperature';
 --Delay between readings (ms)
-Settings.ReadDelay = 10000;
+Settings.ReadDelay = 2000;
 --Number of Readings to Average
 Settings.AverageNumReadings=4;
 

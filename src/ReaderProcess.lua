@@ -11,8 +11,39 @@ ledpin=0
 gpio.mode(ledpin,gpio.OUTPUT)
 led_state=0
 
+--setup the averaging objects used later
+temp1Readings = {};
+distReadings = {};
+temp2Readings = {};
+humi2Readings = {};
+
+for i,0,Settings.AverageNumReadings do
+    temp1Readings[i] = 0;
+    distReadings[i] = 0;
+    temp2Readings[i] = 0;
+    humi2Readings[i] = 0;
+end
+
 -- init mqtt client with keepalive timer 120sec
 mqttconnected = 0
+
+--used to average together set of values and return an averaged value
+function average_readings(obj, newValue)   
+    --move the values around to make it work
+    for i,Settings.AverageNumReadings,1,-1 do
+        obj[i-1] = obj[i];
+    end
+    --insert the new reading
+    obj[Settings.AverageNumReadings] = newValue;
+
+    --average the values
+    avg = 0
+    for i,0,Settings.AverageNumReadings,1 do
+        avg = avg + obj[i];
+    end
+
+    return avg/Settings.AverageNumReadings;
+end
 
 --Used to establish the mqtt connecttion
 function connect_mqtt()
@@ -95,6 +126,9 @@ tmr.alarm(0,Settings.ReadDelay,1,function()
                 print("Humi2:"..humi)
             end
         end
+
+        --average the readings
+        temp=average_readings(temp2Readings,temp);
 
         msg={}
         msg.temp1=ctemp
